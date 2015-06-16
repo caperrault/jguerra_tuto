@@ -45,33 +45,85 @@ text.shadow {
 
 <script>
 
-var url ="https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=77a8e5f456fd6155bbff0f503408740e&extras=tags%2Ccount_views&per_page=500&format=json&nojsoncallback=1";
+// var url ="https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=747ffbcf83768699e213f29ccb93aa78&extras=tags%2Ccount_views&per_page=500&format=json&nojsoncallback=1";
+
+// var w = 800,
+//     h = 600;
+//
+// var svg = d3.select("#chart")
+//     .append("svg")
+//     .attr("width", w)
+//     .attr("height", h);
+//
+// var force;
+//
+// function update(nodes, links) {
+//     force = d3.layout.force()
+//       .nodes(nodes)
+//       .links(links)
+//       .size([w, h])
+//       .linkDistance(80)
+//       .charge(-500)
+//       .on("tick", tick)
+//       .start();
+//
+//       var circle = svg.append("svg:g").selectAll("circle")
+//     .data(force.nodes())
+//   .enter().append("svg:circle")
+//     .attr("r", 8)
+//     .call(force.drag);
+//
+//     function tick(e) {
+//       circle.attr("transform", function(d) {
+//         return "translate(" + d.x + "," + d.y + ")";
+//       });
+//     }
+//
+// }
+//
+// d3.json(url, function(error, data){
+//   var network = FlickrUtils.getTagNetwork(data, 10);
+//   update(network.nodes, network.edge);
+// });
+
+var url = "https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=747ffbcf83768699e213f29ccb93aa78&extras=tags%2Ccount_views&per_page=500&format=json&nojsoncallback=1&auth_token=72157654238073590-38231158cb7a7de9&api_sig=4d84ba04e4ebb0d39b69f37544434bc3";
 
 var w = 800,
     h = 600;
 
 var svg = d3.select("#chart")
     .append("svg")
-    .attr("width", w)
-    .attr("height", h);
+        .attr("width", w)
+        .attr("height", h);
 
-function update(nodes, links){
+var force;
+
+function update(nodes, links) {
     force = d3.layout.force()
-      .nodes(nodes)
-      .links(links)
-      .size([w, h])
-      .linkDistance(80)
-      .charge(-500)
-      .on("tick", tick)
-      .start();
+        .nodes(nodes)
+      //  .links(links)
+        .size([w, h])
+        .linkDistance(80)
+        .charge(-50)
+        .on("tick", tick)
+        .start();
+
+var circle = svg.append("svg:g").selectAll("circle")
+    .data(force.nodes())
+  .enter().append("svg:circle")
+    .attr("r", 8)
+    .call(force.drag);
+
+    function tick(e) {
+      circle.attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";        
+      });
+    }
 }
 
-d3.json(url, function(error, data){
-  var network = FlickrUtils.getTagNetwork(data, 10);
-  update(network.nodes, network.edge);
-  console.log(network);
+d3.json(url, function (error, data) {
+    var network = FlickrUtils.getTagNetwork(data, 10);
+    update(network.nodes, network.edges);
 });
-
-//19:53
 
 </script>
