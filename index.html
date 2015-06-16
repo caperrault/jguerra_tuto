@@ -5,7 +5,7 @@
 
 path.link {
   fill: none;
-  stroke: #666;
+  /*stroke: #666;*/
   stroke-width: 2px;
 }
 
@@ -98,6 +98,9 @@ var svg = d3.select("#chart")
 
 var force;
 
+var rScale = d3.scale.linear().range([2,15]);
+var edgeColScale = d3.scale.linear().range(["grey","red"]);
+
 function update(nodes, links) {
     force = d3.layout.force()
         .nodes(nodes)
@@ -108,15 +111,20 @@ function update(nodes, links) {
         .on("tick", tick)
         .start();
 
+rScale.domain(d3.extent(nodes, function (d) {return d.value;}));
+
+edgeColScale.domain(d3.extent(links, function(d) { return d.value; } ));
+
 var path = svg.append("svg:g").selectAll("path")
     .data(force.links())
   .enter().append("svg:path")
-    .attr("class", function(d) { return "link ";});
+    .attr("stroke", function (d) { return edgeColScale(d.value); })
+    .attr("class", function(d) { return "link "; });
 
 var circle = svg.append("svg:g").selectAll("circle")
     .data(force.nodes())
   .enter().append("svg:circle")
-    .attr("r", 8)
+    .attr("r", function(d) { return rScale(d.value); })
     .call(force.drag);
 
     var text = svg.append("svg:g").selectAll("g")
