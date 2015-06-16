@@ -101,12 +101,17 @@ var force;
 function update(nodes, links) {
     force = d3.layout.force()
         .nodes(nodes)
-      //  .links(links)
+        .links(links)
         .size([w, h])
         .linkDistance(80)
         .charge(-50)
         .on("tick", tick)
         .start();
+
+var path = svg.append("svg:g").selectAll("path")
+    .data(force.links())
+  .enter().append("svg:path")
+    .attr("class", function(d) { return "link ";});
 
 var circle = svg.append("svg:g").selectAll("circle")
     .data(force.nodes())
@@ -131,6 +136,13 @@ var circle = svg.append("svg:g").selectAll("circle")
         .text(function(d) { return d.name; });
 
     function tick(e) {
+
+      path.attr("d", function(d) {
+        var dx = d.target.x - d.source.x,
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy);
+        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+      });
 
       circle.attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
