@@ -1,0 +1,77 @@
+<h1>Step1</h1>
+<div id="chart"></div>
+
+<style>
+
+path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 2px;
+}
+
+marker#licensing {
+  fill: lightgreen;
+}
+
+path.link.licensing {
+  stroke: lightgreen;
+}
+
+path.link.resolved {
+  stroke-dasharray: 0,2 1;
+}
+
+circle {
+  fill: #ccc;
+  stroke: #333;
+  stroke-width: 3px;
+}
+
+text {
+  font: 14px sans-serif;
+  pointer-events: none;
+}
+
+text.shadow {
+  stroke: #fff;
+  stroke-width: 4px;
+}
+
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="http://infovis.co/flickr_utils.js"></script>
+<script type="text/javascript" src="http://dutovis.com/forceInABox/forceInABox.js"></script>
+
+<script>
+
+var url ="https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=77a8e5f456fd6155bbff0f503408740e&extras=tags%2Ccount_views&per_page=500&format=json&nojsoncallback=1";
+
+var w = 800,
+    h = 600;
+
+var svg = d3.select("#chart")
+    .append("svg")
+    .attr("width", w)
+    .attr("height", h);
+
+function update(nodes, links){
+    force = d3.layout.force()
+      .nodes(nodes)
+      .links(links)
+      .size([w, h])
+      .linkDistance(80)
+      .charge(-500)
+      .on("tick", tick)
+      .start();
+}
+
+d3.json(url, function(error, data){
+  var network = FlickrUtils.getTagNetwork(data, 10);
+  update(network.nodes, network.edge);
+  console.log(network);
+});
+
+//19:53
+
+</script>
