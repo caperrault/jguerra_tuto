@@ -41,6 +41,7 @@ text.shadow {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="http://infovis.co/flickr_utils.js"></script>
+<script type="text/javascript" src="http://dutovis.com/netAnalysisJs/netClustering.js"></script>
 <script type="text/javascript" src="http://dutovis.com/forceInABox/forceInABox.js"></script>
 
 <script>
@@ -98,16 +99,23 @@ var svg = d3.select("#chart")
 
 var force;
 
-var rScale = d3.scale.linear().range([2,15]);
+var rScale = d3.scale.linear().range([2,35]);
 var edgeColScale = d3.scale.linear().range(["grey","red"]);
+var colScale = d3.scale.category20();
+var yScale = d3.scale.linear().range([0,h])
 
 function update(nodes, links) {
     force = d3.layout.force()
+    //.d3.layout.forceInABox()
         .nodes(nodes)
         .links(links)
         .size([w, h])
-        .linkDistance(80)
-        .charge(-50)
+        .linkDistance(10)
+        .linkStrength(0.1)
+      //  .linkStrengthInterCluster(0.01)
+        //.gravityToFoci(0.2)
+        .charge(-300)
+        .gravity(0.1)
         .on("tick", tick)
         .start();
 
@@ -125,6 +133,7 @@ var circle = svg.append("svg:g").selectAll("circle")
     .data(force.nodes())
   .enter().append("svg:circle")
     .attr("r", function(d) { return rScale(d.value); })
+    .style("fill", function(d) { return colScale(d.cluster); })
     .call(force.drag);
 
     var text = svg.append("svg:g").selectAll("g")
@@ -144,6 +153,15 @@ var circle = svg.append("svg:g").selectAll("circle")
         .text(function(d) { return d.name; });
 
     function tick(e) {
+
+      var q = d3.geom.quadtree(nodes);
+
+      nodes.forEach(function(o) {
+          o.y = 100;
+          q.visit(collide(o));
+      });
+
+    //  force.onTick(e);
 
       path.attr("d", function(d) {
         var dx = d.target.x - d.source.x,
@@ -165,7 +183,32 @@ var circle = svg.append("svg:g").selectAll("circle")
 
 d3.json(url, function (error, data) {
     var network = FlickrUtils.getTagNetwork(data, 10);
+    netClustering.cluster(network.nodes, network.edges);
     update(network.nodes, network.edges);
 });
+
+function collide(node) {
+  var r = rScale(node.value) + 16,
+      nx1 = node.x - r,
+      nx2 = node.x + r,
+      ny1 = node.y - r,
+      ny2 = node.y + r;
+  return function(quad, x1, y1, x2, y2) {
+    if (quad.point && (quad.point !== node)) {
+      var x = node.x - quad.point.x,
+          y = node.y - quad.point.y,
+          l = Math.sqrt(x * x + y * y),
+          r = rScale(node.value) + rScale(quad.point.value);
+      if (l < r) {
+        l = (l - r) / l * .5;
+        node.x -= x *= l;
+        node.y -= y *= l;
+        quad.point.x += x;
+        quad.point.y += y;
+      }
+    }
+    return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+  };
+}
 
 </script>
