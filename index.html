@@ -87,8 +87,7 @@ text.shadow {
 //   update(network.nodes, network.edge);
 // });
 
-var url = "https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=747ffbcf83768699e213f29ccb93aa78&extras=tags%2Ccount_views&per_page=500&format=json&nojsoncallback=1&auth_token=72157654238073590-38231158cb7a7de9&api_sig=4d84ba04e4ebb0d39b69f37544434bc3";
-
+var url = "https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=fb66b807d3687cff380a09d3afc115dd&extras=tags%2Ccount_views&per_page=500&format=json&nojsoncallback=1&auth_token=72157654700746435-86497c2903f8d4fd&api_sig=863e45281a31dd2cc526071363972948";
 var w = 800,
     h = 600;
 
@@ -102,7 +101,7 @@ var force;
 var rScale = d3.scale.linear().range([2,35]);
 var edgeColScale = d3.scale.linear().range(["grey","red"]);
 var colScale = d3.scale.category20();
-var yScale = d3.scale.linear().range([0,h])
+var yScale = d3.scale.linear().range([0,h]);
 
 function update(nodes, links) {
     force = d3.layout.force()
@@ -120,6 +119,8 @@ function update(nodes, links) {
         .start();
 
 rScale.domain(d3.extent(nodes, function (d) {return d.value;}));
+
+yScale.domain(d3.extent(nodes, function (d) {return d.value;}));
 
 edgeColScale.domain(d3.extent(links, function(d) { return d.value; } ));
 
@@ -157,7 +158,8 @@ var circle = svg.append("svg:g").selectAll("circle")
       var q = d3.geom.quadtree(nodes);
 
       nodes.forEach(function(o) {
-          o.y = 100;
+        //o.y = 100;
+          o.y = yScale(o.value);
           q.visit(collide(o));
       });
 
